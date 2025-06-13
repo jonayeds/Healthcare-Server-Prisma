@@ -1,8 +1,9 @@
-import express from 'express';
-import { AdminController } from './admin.controller';
+import express from "express";
 
-const router = express.Router()
+import { AdminController } from "./admin.controller";
 
-router.get('/', AdminController.getAllAdmins)
+const router = express.Router();
 
-export const AdminRoutes = router   
+router.get("/", AdminController.getAllAdmins);
+
+export const AdminRoutes = router;
