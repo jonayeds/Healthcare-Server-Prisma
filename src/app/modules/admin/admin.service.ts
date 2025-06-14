@@ -29,6 +29,9 @@ const getAllAdmins = async (
       })),
     });
   }
+  andConditions.push({
+    isDeleted:false
+  })
   const whereConditions: Prisma.AdminWhereInput = { AND: andConditions };
   const result = await prisma.admin.findMany({
     where: whereConditions,
@@ -40,40 +43,106 @@ const getAllAdmins = async (
   });
   const total = await prisma.admin.count({
     where: whereConditions,
-  })
+  });
   return {
     meta: {
       page,
       limit,
-      total
+      total,
     },
-    data:result,
+    data: result,
   };
 };
 
-const getAdminById = async(adminId:string)=>{
+const getAdminById = async (adminId: string) => {
   const result = await prisma.admin.findUnique({
-    where:{
+    where: {
       id: adminId,
-    }
-  })
-  return result
-}
+    },
+  });
+  return result;
+};
 
-const updateAdmin = async(adminId:string, payload: Partial<Admin>)=>{
+const updateAdmin = async (adminId: string, payload: Partial<Admin>) => {
+  const isAdminExists = await prisma.admin.findUnique({
+    where: {
+      id: adminId,
+    },
+  });
+  if (!isAdminExists) {
+    throw new Error("Admin not found");
+  }
   const result = await prisma.admin.update({
     where: {
       id: adminId,
     },
     data: payload,
   });
-  console.log(result)
   return result;
+};
 
-}
+const deleteAdmin = async (adminId: string) => {
+  const isAdminExists = await prisma.admin.findUnique({
+    where: {
+      id: adminId,
+    },
+  });
+  if (!isAdminExists) {
+    throw new Error("Admin not found");
+  }
+  const result = await prisma.$transaction(async (transactionclient) => {
+    const deletedAdmin = await transactionclient.admin.delete({
+      where: {
+        id: adminId,
+      },
+    });
+    await transactionclient.user.delete({
+      where: {
+        email: deletedAdmin.email,
+      },
+    });
+    return deletedAdmin;
+  });
+
+  return result;
+};
+
+const softDeleteAdmin = async (adminId: string) => {
+  const isAdminExists = await prisma.admin.findUnique({
+    where: {
+      id: adminId,
+    },
+  });
+  if (!isAdminExists) {
+    throw new Error("Admin not found");
+  }
+  const result = await prisma.$transaction(async (transactionclient) => {
+    const deletedAdmin = await transactionclient.admin.update({
+      where: {
+        id: adminId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+    await transactionclient.user.update({
+      where: {
+        email: deletedAdmin.email,
+      },
+      data:{
+        status:"DELETED"
+      }
+    });
+    return deletedAdmin;
+  });
+
+  return result;
+};
 
 export const AdminService = {
   getAllAdmins,
   getAdminById,
- updateAdmin,  
+  updateAdmin,
+  deleteAdmin,
+  softDeleteAdmin,
 };
