@@ -6,7 +6,11 @@ import { adminSearchableFields } from "./admin.constant";
 const getAllAdmins = async (
   params: Record<string, unknown>,
   options: Record<string, unknown>
-) => {
+) : Promise<{data:Admin[], meta:{
+  page: number;
+  limit: number;
+  total: number;
+}}>=> {
   const { skip, page, limit, sortOrder, sortBy } = calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.AdminWhereInput[] = [];
@@ -54,19 +58,21 @@ const getAllAdmins = async (
   };
 };
 
-const getAdminById = async (adminId: string) => {
+const getAdminById = async (adminId: string): Promise<Admin | null> => {
   const result = await prisma.admin.findUnique({
     where: {
       id: adminId,
+      isDeleted: false, 
     },
   });
   return result;
 };
 
-const updateAdmin = async (adminId: string, payload: Partial<Admin>) => {
+const updateAdmin = async (adminId: string, payload: Partial<Admin>): Promise<Admin | null> => {
   const isAdminExists = await prisma.admin.findUnique({
     where: {
       id: adminId,
+      isDeleted: false,
     },
   });
   if (!isAdminExists) {
@@ -81,7 +87,7 @@ const updateAdmin = async (adminId: string, payload: Partial<Admin>) => {
   return result;
 };
 
-const deleteAdmin = async (adminId: string) => {
+const deleteAdmin = async (adminId: string): Promise<Admin| null> => {
   const isAdminExists = await prisma.admin.findUnique({
     where: {
       id: adminId,
@@ -107,10 +113,11 @@ const deleteAdmin = async (adminId: string) => {
   return result;
 };
 
-const softDeleteAdmin = async (adminId: string) => {
+const softDeleteAdmin = async (adminId: string):Promise<Admin |  null> => {
   const isAdminExists = await prisma.admin.findUnique({
     where: {
       id: adminId,
+      isDeleted: false,
     },
   });
   if (!isAdminExists) {
