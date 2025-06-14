@@ -3,6 +3,7 @@ import cors from 'cors';
 import { indexRoute } from './app/routes';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import  httpStatus from 'http-status';
+import cookieParser from 'cookie-parser';
 
 
 export const app:Application = express()
@@ -10,7 +11,8 @@ export const app:Application = express()
 // perser middleware
 app.use(cors())
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))   
+app.use(express.urlencoded({extended: true}))  
+app.use(cookieParser()) 
 
 app.get('/', (req, res) => {
     res.send('Health Check: Server is running!')
