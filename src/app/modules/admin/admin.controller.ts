@@ -11,10 +11,30 @@ const getAllAdmins = async (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Admins fetched successfully",
-    data: result,
+    data: result.data || [],
+    meta:result.meta || {},
   });
 };
 
+const getAdminById = async (req: Request, res: Response) => {
+  try {
+      const result = await AdminService.getAdminById(req.params.id)
+      res.status(200).json({
+    success: true,
+    message: "Admin fetched successfully",
+    data: result,
+  });
+  } catch (error) {
+    res.status(400).json({
+    success: false,
+    message: "Failed to fetch admin",
+    error,
+  });
+  }
+
+}
+
 export const AdminController = {
   getAllAdmins,
+  getAdminById,
 };
