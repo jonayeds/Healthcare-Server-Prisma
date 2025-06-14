@@ -1,6 +1,7 @@
-import express, { Application } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { indexRoute } from './app/routes';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
 
 
 
@@ -16,3 +17,4 @@ app.get('/', (req, res) => {
 })
 app.use('/api/v1', indexRoute)
 
+app.use(globalErrorHandler)
