@@ -5,7 +5,6 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import  httpStatus from 'http-status';
 import cookieParser from 'cookie-parser';
 
-
 export const app:Application = express()
 
 // perser middleware

@@ -1,11 +1,15 @@
 import prisma from "../../../shared/prisma";
 import bcrypt from "bcrypt";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
+import { UserStatus } from "../../../../generated/prisma";
+import config from "../../../config";
+import { SignOptions } from "jsonwebtoken";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: payload.email,
+      status: UserStatus.ACTIVE,
     },
   });
   const isPasswordMatch = await bcrypt.compare(
@@ -17,13 +21,13 @@ const loginUser = async (payload: { email: string; password: string }) => {
   }
   const accessToken = jwtHelpers.generateToken(
     { email: userData.email, role: userData.role },
-    "efwefwfef",
-    { expiresIn: "5m" }
+   config.jwt.jwt_secret as string,
+    { expiresIn: config.jwt.expires_in } as SignOptions
   );
   const refreshToken = jwtHelpers.generateToken(
     { email: userData.email, role: userData.role },
-    "efwefwfejnkf",
-    { expiresIn: "10d" }
+    config.jwt.refresh_token_secret as string,
+    { expiresIn: config.jwt.refresh_token_expires_in } as SignOptions 
   );
   return {
     accessToken,
@@ -33,17 +37,18 @@ const loginUser = async (payload: { email: string; password: string }) => {
 };
 
 const refreshToken = async (token: string) => {
-  const decodedData = jwtHelpers.verifyToken(token, "efwefwfejnkf");
+  const decodedData = jwtHelpers.verifyToken(token, config.jwt.refresh_token_secret as string);
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: decodedData?.email,
+      status: UserStatus.ACTIVE,
     },
   });
 
   const accessToken = jwtHelpers.generateToken(
     { email: userData.email, role: userData.role },
-    "efwefwfef",
-    { expiresIn: "5m" }
+    config.jwt.jwt_secret as string,
+    { expiresIn: config.jwt.expires_in } as SignOptions
   );
   return { accessToken };
 };
