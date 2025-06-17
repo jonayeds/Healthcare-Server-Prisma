@@ -3,7 +3,8 @@ import bcrypt from "bcrypt";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
 import { UserStatus } from "../../../../generated/prisma";
 import config from "../../../config";
-import { SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
+import { ApiError } from "../../errors/ApiError";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
@@ -53,7 +54,35 @@ const refreshToken = async (token: string) => {
   return { accessToken };
 };
 
+const changePassword = async(user:JwtPayload, payload:any)=>{
+  const userData = await prisma.user.findUniqueOrThrow({
+    where:{
+      email:user.email
+    }
+  })
+  const isPasswordMatch = await bcrypt.compare(
+    payload.oldPassword,
+    userData.password
+  );
+  if (!isPasswordMatch) {
+    throw new ApiError(400, "Old password is incorrect"); 
+  }
+  const hashedPassword = await bcrypt.hash(payload.newPassword, 10);
+  const updatedUser = await prisma.user.update({
+    where: {
+      email: user.email,
+      status: UserStatus.ACTIVE
+    },
+    data: {
+      password: hashedPassword,
+      needPasswordChange: false, 
+    }
+  })
+
+}
+
 export const AuthService = {
   loginUser,
   refreshToken,
+  changePassword
 };
