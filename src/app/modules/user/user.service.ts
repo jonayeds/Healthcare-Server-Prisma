@@ -1,9 +1,17 @@
 import {  UserRole } from "../../../../generated/prisma"
 import bcrypt from "bcrypt"
 import prisma from "../../../shared/prisma"
+import { fileUploader } from "../../../helpers/uploader"
+import { Request } from "express"
 
 
-const createAdmin = async(data:any)=>{
+const createAdmin = async(req:Request)=>{
+    const file = req.file
+    if(file){
+        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file)
+        req.body.admin.profilePhoto = uploadToCloudinary?.optimizeUrl 
+    }
+    const data = req.body   
     const hashedPassword = await bcrypt.hash(data.password, 10)
     const userData = {
         email: data.admin.email,
