@@ -6,6 +6,7 @@ import config from "../../../config";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { ApiError } from "../../errors/ApiError";
 import emailSender from "./emailSender";
+import httpStatus from "http-status";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
@@ -97,7 +98,7 @@ const forgotPassword = async (payload: { email: string }) => {
     config.jwt.reset_password_secret as string,
     { expiresIn: config.jwt.reset_password_expires_in } as SignOptions
   );
-  const resetPasswordUrl = `${config.client_url}/reset-password?token=${resetToken}&email=${userData.email}`;
+  const resetPasswordUrl = `${config.client_url}/reset-password?token=${resetToken}&userId=${userData.id}`;
   await emailSender(userData.email, `
     <div>
         <p>Dear user</p>
@@ -108,9 +109,38 @@ const forgotPassword = async (payload: { email: string }) => {
 
 };
 
+const resetPassword = async(token:string, payload:{id:string,password:string})=>{
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: payload.id,
+      status: UserStatus.ACTIVE,
+    },
+  })
+  const decodedData = jwtHelpers.verifyToken(
+    token,
+    config.jwt.reset_password_secret as string
+  );
+  if(!decodedData){
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid or expired token");  
+  }
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: payload.id,
+      status: UserStatus.ACTIVE,
+    },
+    data: {
+      password: hashedPassword,
+      needPasswordChange: false,
+    },        
+  })
+  return updatedUser;
+}
+
 export const AuthService = {
   loginUser,
   refreshToken,
   changePassword,
   forgotPassword,
+  resetPassword
 };
