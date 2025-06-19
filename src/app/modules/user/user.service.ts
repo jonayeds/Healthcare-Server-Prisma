@@ -168,10 +168,31 @@ const changeProfileStatus = async(id:string, data:{status:UserStatus})=>{
     return updateUserStatus
 }
 
+const getMyProfile = async(user:any)=>{
+    console.log(user)
+    const userInfo = await prisma.user.findUniqueOrThrow({
+        where:{
+            email: user.email
+        },
+        select:{
+            [user.role === UserRole.SUPER_ADMIN ? 'admin': user.role.toLowerCase()]: true,
+            id: true,
+            email: true,
+            role: true, 
+            needPasswordChange: true,
+            status: true,   
+            createdAt: true,    
+            updatedAt: true,    
+        }
+    })
+    return userInfo
+}
+
 export const UserService = {
   createAdmin,
   createDoctor,
   createPatient,
   getAllUsers,
-  changeProfileStatus
+  changeProfileStatus,
+  getMyProfile
 };
