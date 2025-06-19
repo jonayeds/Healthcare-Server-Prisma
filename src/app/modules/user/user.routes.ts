@@ -33,7 +33,6 @@ router.post(
 );
 router.post(
   "/create-patient",
-  auth(UserRole.PATIENT, UserRole.ADMIN, UserRole.SUPER_ADMIN),
   fileUploader.upload.single("file"),
   (req:Request, res:Response, next:NextFunction)=>{
     req.body = JSON.parse(req.body.data);   
@@ -42,5 +41,10 @@ router.post(
   validateRequest(UserValidationSchema.createPatient),
   UserController.createPatient
 );
+router.get(
+  "/",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN), 
+  UserController.getAllUsers  
+)
 
 export const UserRoutes = router;
