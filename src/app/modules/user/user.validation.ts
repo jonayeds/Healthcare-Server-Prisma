@@ -60,9 +60,38 @@ const updateUserStatus = z.object({
   })
 })
 
+const updateMyProfileSchemaAdmin = z.object({
+  body:z.object({
+    name: z.string().optional(),
+    contactNumber: z.string().optional(), 
+  })
+})
+const updateMyProfileSchemaPatient = z.object({
+  body:z.object({
+    name: z.string().optional(),
+    contactNumber: z.string().optional(), 
+    address: z.string().optional(), 
+  })
+})
+const updateMyProfileSchemaDoctor = z.object({
+  body:z.object({
+    name: z.string().optional(),
+    contactNumber: z.string().optional(), 
+    address: z.string().optional(), 
+    experience: z.number().optional(),  
+    appointmentFee: z.number().optional(),
+    qualification: z.string().optional(), 
+    currentWorkingPlace: z.string().optional(), 
+    designation: z.string().optional(),   
+  })
+})
+
 export const UserValidationSchema = {
   createAdmin,
   createDoctor,
   createPatient,
-  updateUserStatus
+  updateUserStatus,
+  updateMyProfileSchemaAdmin,
+  updateMyProfileSchemaPatient,
+  updateMyProfileSchemaDoctor
 };

@@ -5,6 +5,7 @@ import { fileUploader } from "../../../helpers/uploader";
 import { Request } from "express";
 import calculatePagination from "../../../helpers/paginationHelper";
 import { userSearchableFilds } from "./user.constant";
+import { JwtPayload } from "jsonwebtoken";
 
 const createAdmin = async (req: Request) => {
   const file = req.file;
@@ -169,10 +170,10 @@ const changeProfileStatus = async(id:string, data:{status:UserStatus})=>{
 }
 
 const getMyProfile = async(user:any)=>{
-    console.log(user)
     const userInfo = await prisma.user.findUniqueOrThrow({
         where:{
-            email: user.email
+            email: user.email,
+            status: UserStatus.ACTIVE       
         },
         select:{
             [user.role === UserRole.SUPER_ADMIN ? 'admin': user.role.toLowerCase()]: true,
@@ -188,11 +189,48 @@ const getMyProfile = async(user:any)=>{
     return userInfo
 }
 
+const updateMyProfile = async(user:JwtPayload, payload:any)=>{
+    const userInfo = await prisma.user.findUniqueOrThrow({
+        where:{
+            email: user.email,
+            status: UserStatus.ACTIVE   
+        },
+    })
+    let profileInfo;
+    if(userInfo.role === UserRole.SUPER_ADMIN || userInfo.role === UserRole.ADMIN){
+         profileInfo = await prisma.admin.update({
+            where:{
+                email: userInfo.email,
+            },
+            data: payload
+        })
+    }
+    else if(userInfo.role === UserRole.DOCTOR){
+        profileInfo = await prisma.doctor.update({
+            where:{
+                email: userInfo.email,
+            },
+            data: payload
+        })
+    }
+    else if(userInfo.role === UserRole.PATIENT){
+        profileInfo = await prisma.patient.update({
+            where:{
+                email: userInfo.email,
+            },
+            data: payload
+        })
+    }
+    return profileInfo
+
+}
+
 export const UserService = {
   createAdmin,
   createDoctor,
   createPatient,
   getAllUsers,
   changeProfileStatus,
-  getMyProfile
+  getMyProfile,
+  updateMyProfile
 };
