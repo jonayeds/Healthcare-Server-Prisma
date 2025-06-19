@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender } from "../../../../generated/prisma";
+import { Gender, UserStatus } from "../../../../generated/prisma";
 
 const createAdmin = z.object({
   body: z.object({
@@ -54,8 +54,15 @@ const createPatient = z.object({
   }),
 });
 
+const updateUserStatus = z.object({
+  body: z.object({
+    status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED, UserStatus.DELETED], {required_error: "Status is required"}),  
+  })
+})
+
 export const UserValidationSchema = {
   createAdmin,
   createDoctor,
-  createPatient
+  createPatient,
+  updateUserStatus
 };

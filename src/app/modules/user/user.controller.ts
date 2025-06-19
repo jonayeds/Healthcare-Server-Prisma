@@ -68,9 +68,20 @@ const getAllUsers = catchAsync(async(req, res)=>{
     })
 })
 
+const changeProfileStatus = catchAsync(async(req, res)=>{
+    const result = await UserService.changeProfileStatus(req.params.id, req.body);
+    sendResponse(res,{
+        success: true,
+        statusCode: 200,
+        message: "Users fetched successfully",
+        data: result
+    })
+})
+
 export const UserController = {
     createAdmin,
     createDoctor,
     createPatient,
-    getAllUsers
+    getAllUsers,
+    changeProfileStatus
 }

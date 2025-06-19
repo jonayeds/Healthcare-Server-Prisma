@@ -1,4 +1,4 @@
-import { Prisma, User, UserRole } from "../../../../generated/prisma";
+import { Prisma, User, UserRole, UserStatus } from "../../../../generated/prisma";
 import bcrypt from "bcrypt";
 import prisma from "../../../shared/prisma";
 import { fileUploader } from "../../../helpers/uploader";
@@ -151,9 +151,27 @@ const getAllUsers = async (
   };
 };
 
+const changeProfileStatus = async(id:string, data:{status:UserStatus})=>{
+    const userData = await prisma.user.findUniqueOrThrow({
+        where:{
+            id
+        }
+    })
+    const updateUserStatus = await prisma.user.update({
+        where:{
+            id
+        },
+        data:{
+            status: data.status
+        }
+    })
+    return updateUserStatus
+}
+
 export const UserService = {
   createAdmin,
   createDoctor,
   createPatient,
   getAllUsers,
+  changeProfileStatus
 };
