@@ -18,8 +18,8 @@ model User {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  admin  Admin?
-  doctor Doctor?
+  admin   Admin?
+  doctor  Doctor?
   patient Patient?
 
   @@map("users")
@@ -61,6 +61,8 @@ model Doctor {
 
   user User @relation(fields: [email], references: [email])
 
+  specialities DoctorSpeciality[]
+
   @@map("doctors")
 }
 
@@ -72,12 +74,33 @@ model Patient {
   contactNumber String
   address       String
   isDeleted     Boolean  @default(false)
-  createdAt     DateTime @default(now())  
-  updatedAt     DateTime @updatedAt 
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [email], references: [email])
 
-  @@map("patients")  
+  @@map("patients")
+}
+
+model Speciality {
+  id    String @id @default(uuid())
+  title String
+  icon  String
+
+  doctors DoctorSpeciality[]
+
+  @@map("specialities")
+}
+
+model DoctorSpeciality {
+  doctorId     String
+  specialityId String
+
+  doctor     Doctor     @relation(fields: [doctorId], references: [id])
+  speciality Speciality @relation(fields: [specialityId], references: [id])
+
+  @@id([doctorId, specialityId])
+  @@map("doctorSpecialities")
 }
 
 enum UserRole {

@@ -6,6 +6,7 @@ import pick from "../../../shared/picked";
 import { userFilterableFields } from "./user.constant";
 import { JwtPayload } from "jsonwebtoken";
 import { fileUploader } from "../../../helpers/uploader";
+import { TAuthUser } from "../../interfaces/common";
 
 const createAdmin = async(req:Request, res:Response)=>{
     try {
@@ -79,9 +80,9 @@ const changeProfileStatus = catchAsync(async(req, res)=>{
         data: result
     })
 })
-const getMyProfile = catchAsync(async(req: Request & {user?:JwtPayload}, res)=>{
+const getMyProfile = catchAsync(async(req: Request & {user?:TAuthUser}, res)=>{
     const user = req.user;
-    const result = await UserService.getMyProfile(user);
+    const result = await UserService.getMyProfile(user as TAuthUser);
     sendResponse(res,{
         success: true,
         statusCode: 200,
@@ -89,7 +90,7 @@ const getMyProfile = catchAsync(async(req: Request & {user?:JwtPayload}, res)=>{
         data: result
     })
 })
-const updateMyProfile = catchAsync(async(req: Request & {user?:JwtPayload}, res)=>{
+const updateMyProfile = catchAsync(async(req: Request & {user?:TAuthUser}, res)=>{
     const user = req.user;
     const file = req.file;
     console.log(req.body)
@@ -97,7 +98,7 @@ const updateMyProfile = catchAsync(async(req: Request & {user?:JwtPayload}, res)
         const uploadToCloudinary = await fileUploader.uploadToCloudinary(file)
         req.body.profilePhoto = uploadToCloudinary?.optimizeUrl;        
     }
-    const result = await UserService.updateMyProfile(user as JwtPayload, req.body);
+    const result = await UserService.updateMyProfile(user as TAuthUser, req.body);
     sendResponse(res,{
         success: true,
         statusCode: 200,

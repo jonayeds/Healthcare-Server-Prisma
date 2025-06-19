@@ -6,6 +6,7 @@ import { Request } from "express";
 import calculatePagination from "../../../helpers/paginationHelper";
 import { userSearchableFilds } from "./user.constant";
 import { JwtPayload } from "jsonwebtoken";
+import { TAuthUser } from "../../interfaces/common";
 
 const createAdmin = async (req: Request) => {
   const file = req.file;
@@ -169,7 +170,7 @@ const changeProfileStatus = async(id:string, data:{status:UserStatus})=>{
     return updateUserStatus
 }
 
-const getMyProfile = async(user:any)=>{
+const getMyProfile = async(user:TAuthUser)=>{
     const userInfo = await prisma.user.findUniqueOrThrow({
         where:{
             email: user.email,
@@ -189,10 +190,10 @@ const getMyProfile = async(user:any)=>{
     return userInfo
 }
 
-const updateMyProfile = async(user:JwtPayload, payload:any)=>{
+const updateMyProfile = async(user:TAuthUser, payload:any)=>{
     const userInfo = await prisma.user.findUniqueOrThrow({
         where:{
-            email: user.email,
+            email: user?.email,
             status: UserStatus.ACTIVE   
         },
     })
