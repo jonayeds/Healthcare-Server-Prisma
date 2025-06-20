@@ -1,0 +1,1 @@
+export const doctorFilterableFields =  ["searchTerm", "name", "email", "contactNumber", "registrationNumber", "currentWorkingPlace", "designation"]

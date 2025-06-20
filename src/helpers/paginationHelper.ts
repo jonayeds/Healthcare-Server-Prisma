@@ -1,4 +1,4 @@
-type TOprions = {
+type TOptions = {
   page?: number;
   limit?: number;
   sortOrder?: string;
@@ -13,7 +13,7 @@ type TOptionResult = {
   sortBy: string;
 };
 
-const calculatePagination = (options: TOprions): TOptionResult => {
+const calculatePagination = (options: TOptions): TOptionResult => {
   const page = Number(options?.page) || 1;
   const limit = Number(options?.limit) || 5;
   const skip = (page - 1) * limit;
