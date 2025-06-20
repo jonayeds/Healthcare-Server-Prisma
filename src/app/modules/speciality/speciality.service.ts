@@ -7,6 +7,12 @@ const createSpeciality = async(data:any)=>{
     return result
 }
 
+const getAllSpecialities = async()=>{
+    const result = await prisma.speciality.findMany()
+    return result 
+}
+
 export const SpecialityService = {
-    createSpeciality
+    createSpeciality,
+    getAllSpecialities  
 }

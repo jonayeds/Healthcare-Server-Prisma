@@ -17,6 +17,18 @@ const createSpeciality = catchAsync(async(req, res)=>{
     })
 })
 
+
+const getAllSpecialities = catchAsync(async(req, res)=>{
+    const result = await SpecialityService.getAllSpecialities()
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Specialities fetched successfully",
+        data: result
+    })
+})
+
 export const SpecialityController = {
-    createSpeciality
+    createSpeciality,
+    getAllSpecialities
 }
