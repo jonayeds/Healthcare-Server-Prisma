@@ -12,7 +12,17 @@ const getAllSpecialities = async()=>{
     return result 
 }
 
+const deleteSpeciality = async(id:string)=>{
+    const result = await prisma.speciality.delete({
+        where:{
+            id
+        }
+    })
+    return result       
+}
+
 export const SpecialityService = {
     createSpeciality,
-    getAllSpecialities  
+    getAllSpecialities,
+    deleteSpeciality  
 }

@@ -19,5 +19,6 @@ router.post("/",
     SpecialityController.createSpeciality)
 
 router.get("/", auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT, UserRole.SUPER_ADMIN), SpecialityController.getAllSpecialities )
+router.delete("/:id", auth(UserRole.ADMIN, UserRole.SUPER_ADMIN), SpecialityController.deleteSpeciality )
 
 export const SpecialityRoutes = router; 

@@ -28,7 +28,18 @@ const getAllSpecialities = catchAsync(async(req, res)=>{
     })
 })
 
+const deleteSpeciality = catchAsync(async(req, res)=>{
+    const result = await SpecialityService.deleteSpeciality(req.params.id)
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Speciality deleted successfully",
+        data: result
+    })
+})
+
 export const SpecialityController = {
     createSpeciality,
-    getAllSpecialities
+    getAllSpecialities,
+    deleteSpeciality
 }
