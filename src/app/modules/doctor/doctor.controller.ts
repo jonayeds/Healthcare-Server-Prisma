@@ -16,7 +16,17 @@ const getAllDoctors = catchAsync(async(req, res)=>{
         data: result.data       
     })         
 })
+const deleteDoctor = catchAsync(async(req, res)=>{
+    const result = await DoctorService.deleteDoctor(req.params.id) 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Doctors fetched successfully",
+        data: result     
+    })         
+})
 
 export const DoctorController = {
-    getAllDoctors
+    getAllDoctors,
+    deleteDoctor
 }
