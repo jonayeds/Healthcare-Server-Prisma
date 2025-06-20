@@ -1,4 +1,5 @@
-import { Doctor, Prisma } from "../../../../generated/prisma";
+import { resolveObjectURL } from "node:buffer";
+import { Doctor, Prisma, UserStatus } from "../../../../generated/prisma";
 import calculatePagination from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { ApiError } from "../../errors/ApiError";
@@ -63,24 +64,56 @@ const getAllDoctors = async (
   };
 };
 
-const deleteDoctor = async(id:string)=>{
+const deleteDoctor = async (id: string) => {
   const isexists = await prisma.doctor.findUnique({
     where: {
       id,
-    }
-  }) 
-  if(!isexists) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Doctor not found")
+    },
+  });
+  if (!isexists) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Doctor not found");
   }
   const result = await prisma.doctor.delete({
-    where :{
-      id
-    }
-  })
-  return result 
-}
+    where: {
+      id,
+    },
+  });
+  return result;
+};
+
+const softDeleteDoctor = async (id: string) => {
+  const isexists = await prisma.doctor.findUnique({
+    where: {
+      id,
+    },
+  }); 
+  if (!isexists) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Doctor not found");
+  } 
+  const result = await prisma.$transaction(async (tx) => {
+    const doctorData = await tx.doctor.update({
+      where: {
+        id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+    const userdata = await tx.user.update({
+      where: {
+        email: isexists.email,
+      },
+      data:{
+        status:UserStatus.DELETED
+      }
+    })
+    return {doctor:doctorData, user:userdata}
+  });
+  return result
+};
 
 export const DoctorService = {
   getAllDoctors,
   deleteDoctor,
+  softDeleteDoctor,
 };
