@@ -6,4 +6,5 @@ export interface IDoctorFilterRequest {
     registrationNumber?: string;
     currentWorkingPlace?: string;
     designation?: string;
+    specialities?: string;    
 }

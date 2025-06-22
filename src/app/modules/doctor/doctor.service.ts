@@ -3,7 +3,7 @@ import { Doctor, Prisma, UserStatus } from "../../../../generated/prisma";
 import calculatePagination from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { ApiError } from "../../errors/ApiError";
-import { doctorFilterableFields } from "./doctor.constant";
+import { doctorFilterableFields, doctorSearchableFields } from "./doctor.constant";
 import { IDoctorFilterRequest } from "./doctor.interface";
 import httpStatus from "http-status";
 
@@ -18,13 +18,14 @@ const getAllDoctors = async (
     total: number;
   };
 }> => {
+
   const { skip, page, limit, sortOrder, sortBy } =
     calculatePagination(pagination);
-  const { searchTerm, ...filterData } = filter;
+  const { searchTerm, specialities, ...filterData } = filter;
   const andConditions: Prisma.DoctorWhereInput[] = [];
   if (filter?.searchTerm) {
     andConditions.push({
-      OR: doctorFilterableFields.map((field) => ({
+      OR: doctorSearchableFields.map((field) => ({
         [field]: {
           contains: filter.searchTerm as string,
           mode: "insensitive",
@@ -32,6 +33,22 @@ const getAllDoctors = async (
       })),
     });
   }
+
+  if(specialities && specialities.length > 0){
+    andConditions.push({
+      specialities:{
+        some:{
+          speciality:{
+            title:{
+              contains:specialities,
+              mode: "insensitive",  
+            }
+          }
+        }
+      }
+    })
+  }
+
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => ({
@@ -44,6 +61,7 @@ const getAllDoctors = async (
   andConditions.push({
     isDeleted: false,
   });
+  // console.dir(andConditions, {depth: Infinity})
   const whereConditions: Prisma.DoctorWhereInput = { AND: andConditions };
   const result = await prisma.doctor.findMany({
     where: whereConditions,
@@ -52,6 +70,13 @@ const getAllDoctors = async (
     },
     skip,
     take: limit,
+    include: {
+      specialities:{
+        select: {
+          speciality: true,
+        },
+      },
+    }
   });
   const total = await prisma.doctor.count();
   return {
