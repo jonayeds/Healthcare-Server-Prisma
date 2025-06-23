@@ -1,10 +1,19 @@
-import express from 'express';  
-import { ScheduleController } from './schedule.controller';
-import auth from '../../middlewares/auth';
-import { UserRole } from '../../../../generated/prisma';
+import express from "express";
+import { ScheduleController } from "./schedule.controller";
+import auth from "../../middlewares/auth";
+import { UserRole } from "../../../../generated/prisma";
 
-const  router = express.Router();    
+const router = express.Router();
 
-router.post("/", auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),ScheduleController.createSchedule)
+router.post(
+  "/",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  ScheduleController.createSchedule
+);
+router.get(
+  "/",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.DOCTOR),
+  ScheduleController.getAllSchedules
+);
 
-export const ScheduleRoutes  = router
+export const ScheduleRoutes = router;

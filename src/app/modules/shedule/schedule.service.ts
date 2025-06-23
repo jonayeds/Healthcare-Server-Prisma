@@ -1,7 +1,8 @@
 import { addHours, addMinutes, format } from "date-fns";
 import prisma from "../../../shared/prisma";
 import { ISchedule } from "./schedule.interface";
-import { Schedule } from "../../../../generated/prisma";
+import { Prisma, Schedule } from "../../../../generated/prisma";
+import calculatePagination from "../../../helpers/paginationHelper";
 
 const createSchedule = async(payload:ISchedule): Promise<Schedule[] | null>=>{
     const {startDate, endDate, startTime, endTime} = payload
@@ -41,8 +42,64 @@ const createSchedule = async(payload:ISchedule): Promise<Schedule[] | null>=>{
     return result
 }
 
-
+const getAllSchedules = async (
+  params: any,
+  options: Record<string, unknown>
+): Promise<{
+  data: Schedule[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}> => {
+  const { skip, page, limit, sortOrder, sortBy } = calculatePagination(options);
+  const { startDate, endDate, ...filterData } = params;
+  const andConditions: Prisma.ScheduleWhereInput[] = [];
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+  if (startDate && endDate) {
+    andConditions.push({
+        AND:[
+            {startDateTime: {
+                gte: new Date(startDate),
+            }},
+            {endDateTime: {
+                lte: new Date(endDate),
+            }},      
+        ]
+    })
+  }
+  const whereConditions: Prisma.ScheduleWhereInput = { AND: andConditions };
+  const result = await prisma.schedule.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [sortBy]: sortOrder === "asc" ? "asc" : "desc",
+    },
+  });
+  const total = await prisma.schedule.count({
+    where: whereConditions,
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 
 export const ScheduleService = {
-    createSchedule
+    createSchedule,
+    getAllSchedules,
 }

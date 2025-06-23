@@ -18,7 +18,12 @@ const createDoctorSchedule = async(payload:{schedules:string[]}, user:any)=>{
     return createdDoctorSchedule
 
 }
+const getAllDoctorSchedules = async()=>{
+
+}
+
 
 export const DoctorScheduleService= {
-    createDoctorSchedule
+    createDoctorSchedule,
+    getAllDoctorSchedules,
 }
