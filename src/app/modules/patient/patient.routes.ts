@@ -17,6 +17,11 @@ router.get(
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   PatientController.getASinglePatient
 );
+router.delete(
+  "/:id",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  PatientController.deletePatient
+);
 router.patch(
   "/:id",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),

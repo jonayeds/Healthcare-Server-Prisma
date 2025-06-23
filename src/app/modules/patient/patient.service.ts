@@ -88,9 +88,36 @@ const updatePatient = async (patientId: string, payload: Partial<Patient>): Prom
   return result;
 };
 
+const deletePatient = async (patientId: string): Promise<Patient| null> => {
+  const isAdminExists = await prisma.patient.findUnique({
+    where: {
+      id: patientId,
+    },
+  });
+  if (!isAdminExists) {
+    throw new Error("Patient not found");
+  }
+  const result = await prisma.$transaction(async (transactionclient) => {
+    const deletedPatient = await transactionclient.patient.delete({
+      where: {
+        id: patientId,
+      },
+    });
+    await transactionclient.user.delete({
+      where: {
+        email: deletedPatient.email,
+      },
+    });
+    return deletedPatient;
+  });
+
+  return result;
+};
+
 
 export const PatientService = {
     getAllPatients,
     getPatientById,
-    updatePatient
+    updatePatient,
+    deletePatient,
 }
