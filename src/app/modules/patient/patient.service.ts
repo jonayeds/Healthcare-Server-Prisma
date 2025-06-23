@@ -59,6 +59,17 @@ const getAllPatients = async (
   };
 };
 
+const getPatientById  = async (id:string)=>{
+    const result = await prisma.patient.findUnique({
+    where: {
+      id,
+      isDeleted: false, 
+    },
+  });
+  return result;
+}
+
 export const PatientService = {
     getAllPatients,
+    getPatientById
 }
