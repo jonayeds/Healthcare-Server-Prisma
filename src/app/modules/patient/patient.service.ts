@@ -69,7 +69,28 @@ const getPatientById  = async (id:string)=>{
   return result;
 }
 
+const updatePatient = async (patientId: string, payload: Partial<Patient>): Promise<Patient | null> => {
+  const isPatientExists = await prisma.patient.findUnique({
+    where: {
+      id: patientId,
+      isDeleted: false,
+    },
+  });
+  if (!isPatientExists) {
+    throw new Error("Patient not found");
+  }
+  const result = await prisma.patient.update({
+    where: {
+      id: patientId,
+    },
+    data: payload,
+  });
+  return result;
+};
+
+
 export const PatientService = {
     getAllPatients,
-    getPatientById
+    getPatientById,
+    updatePatient
 }

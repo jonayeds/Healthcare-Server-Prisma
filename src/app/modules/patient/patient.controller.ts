@@ -24,12 +24,23 @@ const getASinglePatient = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Patients fetched successfully",
+    message: "Patient fetched successfully",
+    data: result,
+  });
+});
+
+const updatePatient = catchAsync(async (req: Request, res: Response) => {
+  const result = await PatientService.updatePatient(req.params.id, req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Patient updated successfully",
     data: result,
   });
 });
 
 export const PatientController = {
   getAllPatients,
-  getASinglePatient
+  getASinglePatient,
+  updatePatient
 };

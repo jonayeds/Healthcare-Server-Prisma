@@ -46,7 +46,7 @@ const softDeleteDoctor = catchAsync(async(req, res)=>{
     })         
 })
 
-const updateSoctor = catchAsync(async(req, res)=>{
+const updateDoctor = catchAsync(async(req, res)=>{
     const result = await DoctorService.updateDoctor(req.params.id, req.body) 
     sendResponse(res, {
         statusCode: 200,
@@ -61,5 +61,5 @@ export const DoctorController = {
     deleteDoctor,
     softDeleteDoctor,
     getDoctorById,
-    updateSoctor
+    updateDoctor
 }
