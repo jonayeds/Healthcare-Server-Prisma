@@ -1,7 +1,7 @@
 import { addHours, addMinutes, format } from "date-fns";
 import prisma from "../../../shared/prisma";
-import { ISchedule } from "./schedule.interface";
-import { Prisma, Schedule } from "../../../../generated/prisma";
+import { IFilterRequest, ISchedule } from "./schedule.interface";
+import { Prisma, Schedule, UserRole } from "../../../../generated/prisma";
 import calculatePagination from "../../../helpers/paginationHelper";
 
 const createSchedule = async(payload:ISchedule): Promise<Schedule[] | null>=>{
@@ -43,8 +43,9 @@ const createSchedule = async(payload:ISchedule): Promise<Schedule[] | null>=>{
 }
 
 const getAllSchedules = async (
-  params: any,
-  options: Record<string, unknown>
+  params: IFilterRequest,
+  options: Record<string, unknown>,
+  doctor:any
 ): Promise<{
   data: Schedule[];
   meta: {
@@ -54,7 +55,7 @@ const getAllSchedules = async (
   };
 }> => {
   const { skip, page, limit, sortOrder, sortBy } = calculatePagination(options);
-  const { startDate, endDate, ...filterData } = params;
+  const {  myAvailableSlots,startDate, endDate, ...filterData } = params;
   const andConditions: Prisma.ScheduleWhereInput[] = [];
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
@@ -77,6 +78,22 @@ const getAllSchedules = async (
         ]
     })
   }
+  if(myAvailableSlots === "true" && doctor.role === UserRole.DOCTOR){
+      const doctorSchedules = await prisma.doctorSchedule.findMany({
+          where:{ 
+              doctor: {
+                  email: doctor?.email,
+                },
+            }
+        })
+        
+        const scheduleIds = doctorSchedules.map((schedule) => schedule.scheduleId);
+        andConditions.push({
+            id:{
+                notIn: scheduleIds,
+            }
+        })
+    }
   const whereConditions: Prisma.ScheduleWhereInput = { AND: andConditions };
   const result = await prisma.schedule.findMany({
     where: whereConditions,
@@ -89,6 +106,7 @@ const getAllSchedules = async (
   const total = await prisma.schedule.count({
     where: whereConditions,
   });
+
   return {
     meta: {
       page,

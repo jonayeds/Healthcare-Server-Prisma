@@ -1,3 +1,4 @@
+import { Request } from "express";
 import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/picked";
 import sendResponse from "../../../shared/sendResponse";
@@ -13,16 +14,17 @@ const createSchedule = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const getAllSchedules = catchAsync(async (req, res) => {
+const getAllSchedules = catchAsync(async (req:Request & {user?:any}, res) => {
   const filters = pick(req.query, [
     "startDateTime",
     "endDateTime",
-    "doctorId",
     "startDate",
     "endDate",
+    "myAvailableSlots"
   ]);
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-  const result = await ScheduleService.getAllSchedules(filters, options);
+  const user = req?.user
+  const result = await ScheduleService.getAllSchedules(filters, options, user);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
