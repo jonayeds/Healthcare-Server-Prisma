@@ -2,7 +2,6 @@ import { report } from "process";
 import {
   MedicalReport,
   Patient,
-  PatientHealthdata,
   Prisma,
 } from "../../../../generated/prisma";
 import calculatePagination from "../../../helpers/paginationHelper";
@@ -159,15 +158,29 @@ const updatePatient = async (
 };
 
 const deletePatient = async (patientId: string): Promise<Patient | null> => {
-  const isAdminExists = await prisma.patient.findUnique({
+  const isPatientExists = await prisma.patient.findUnique({
     where: {
       id: patientId,
+      isDeleted:false
     },
   });
-  if (!isAdminExists) {
+  if (!isPatientExists) {
     throw new Error("Patient not found");
   }
   const result = await prisma.$transaction(async (transactionclient) => {
+    // Delete the patient health Data 
+    await transactionclient.patientHealthdata.delete({
+        where:{
+            patientId,
+        }
+    })    
+    // Delete the medical reports 
+    await transactionclient.medicalReport.deleteMany({
+      where: {
+        patientId,
+      },
+    });  
+    
     const deletedPatient = await transactionclient.patient.delete({
       where: {
         id: patientId,
@@ -187,13 +200,13 @@ const deletePatient = async (patientId: string): Promise<Patient | null> => {
 const softDeletePatient = async (
   patientId: string
 ): Promise<Patient | null> => {
-  const isAdminExists = await prisma.patient.findUnique({
+  const isUserExists = await prisma.patient.findUnique({
     where: {
       id: patientId,
       isDeleted: false,
     },
   });
-  if (!isAdminExists) {
+  if (!isUserExists) {
     throw new Error("Patient not found");
   }
   const result = await prisma.$transaction(async (transactionclient) => {
