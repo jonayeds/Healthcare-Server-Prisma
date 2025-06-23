@@ -1,23 +1,25 @@
-import { addHours, format } from "date-fns";
+import { addHours, addMinutes, format } from "date-fns";
 import prisma from "../../../shared/prisma";
+import { ISchedule } from "./schedule.interface";
+import { Schedule } from "../../../../generated/prisma";
 
-const createSchedule = async(payload:any)=>{
+const createSchedule = async(payload:ISchedule): Promise<Schedule[] | null>=>{
     const {startDate, endDate, startTime, endTime} = payload
     let currentDate = new Date(startDate);
     const lastDate = new Date(endDate);
     const scheduleData = []
     while (currentDate <= lastDate) {
         let startDateTime = new Date(
-            addHours(
+            addMinutes(addHours(
                 `${format(currentDate, "yyyy-MM-dd")}`,
                 Number(startTime.split(":")[0])
-             ),
+             ), Number(startTime.split(":")[1])),
         )
         let endDateTime = new Date(
-            addHours(
+            addMinutes(addHours(
                 `${format(currentDate, "yyyy-MM-dd")}`,
                 Number(endTime.split(":")[0])
-             ),
+             ), Number(endTime.split(":")[1])),
         )
         
         while (startDateTime < endDateTime) {
@@ -33,8 +35,13 @@ const createSchedule = async(payload:any)=>{
         data: scheduleData,
         skipDuplicates: true, 
     })
+    if(result.length === 0){
+        throw new Error("Schedule already exists for the given date range and time");   
+    }
     return result
 }
+
+
 
 export const ScheduleService = {
     createSchedule
