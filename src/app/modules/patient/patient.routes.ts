@@ -22,6 +22,11 @@ router.delete(
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   PatientController.deletePatient
 );
+router.delete(
+  "/soft-delete/:id",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  PatientController.softDeletePatient
+);
 router.patch(
   "/:id",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
