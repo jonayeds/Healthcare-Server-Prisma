@@ -64,6 +64,8 @@ model Doctor {
   specialities    DoctorSpeciality[]
   doctorSchedules DoctorSchedule[]
   appointments    Appointment[]
+  prescriptions   Prescription[]
+  reviews         Review[]  
 
   @@map("doctors")
 }
@@ -82,6 +84,8 @@ model Patient {
   healthData    PatientHealthdata?
   medicalReport MedicalReport[]
   appointments  Appointment[]
+  prescriptions Prescription[]
+  reviews       Review[]  
 
   user User @relation(fields: [email], references: [email])
 
@@ -189,6 +193,8 @@ model Appointment {
 
   doctorSchedule DoctorSchedule?
   payment        Payment?
+  prescription   Prescription?  
+  review         Review?  
 
   patient  Patient  @relation(fields: [patientId], references: [id])
   doctor   Doctor   @relation(fields: [doctorId], references: [id])
@@ -210,6 +216,40 @@ model Payment {
   appointment Appointment @relation(fields: [appointmentId], references: [id])
 
   @@map("payments")
+}
+
+model Prescription {
+  id         String   @id @default(uuid())
+  appointmentId String @unique
+  doctorId  String 
+  patientId String
+  instructions String
+  followUpDate DateTime?
+  createdAt  DateTime @default(now()) 
+  updatedAt  DateTime @updatedAt      
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  doctor      Doctor      @relation(fields: [doctorId], references: [id]) 
+  patient     Patient     @relation(fields: [patientId], references: [id])  
+
+@@map("prescriptions")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  doctorId   String
+  patientId  String
+  appointmentId String @unique
+  rating     Float
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt  
+
+  doctor     Doctor   @relation(fields: [doctorId], references: [id]) 
+  patient    Patient  @relation(fields: [patientId], references: [id])
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@map("reviews")
 }
 
 enum AppointmentStatus {
