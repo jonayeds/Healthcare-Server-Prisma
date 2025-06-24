@@ -15,5 +15,15 @@ router.get(
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.DOCTOR),
   ScheduleController.getAllSchedules
 );
+router.get(
+  "/:id",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.DOCTOR),
+  ScheduleController.getScheduleById
+);
+router.delete(
+  "/:id",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  ScheduleController.deleteSchedule
+);
 
 export const ScheduleRoutes = router;
