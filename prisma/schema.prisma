@@ -168,8 +168,8 @@ model DoctorSchedule {
   isBooked      Boolean @default(false)
   appointmentId String? @unique
 
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
-  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+  schedule    Schedule     @relation(fields: [scheduleId], references: [id])
+  doctor      Doctor       @relation(fields: [doctorId], references: [id])
   appointment Appointment? @relation(fields: [appointmentId], references: [id])
 
   @@id([doctorId, scheduleId])
@@ -180,7 +180,7 @@ model Appointment {
   id             String            @id @default(uuid())
   patientId      String
   doctorId       String
-  scheduleId     String @unique
+  scheduleId     String            @unique
   videoCallingId String?
   status         AppointmentStatus @default(PENDING)
   paymentStatus  PaymentStatus     @default(UNPAID)
@@ -188,12 +188,28 @@ model Appointment {
   updatedAt      DateTime          @updatedAt
 
   doctorSchedule DoctorSchedule?
+  payment        Payment?
 
   patient  Patient  @relation(fields: [patientId], references: [id])
   doctor   Doctor   @relation(fields: [doctorId], references: [id])
   schedule Schedule @relation(fields: [scheduleId], references: [id])
 
   @@map("appointments")
+}
+
+model Payment {
+  id                 String        @id @default(uuid())
+  appointmentId      String        @unique
+  amount             Float
+  transactionId      String        @unique
+  status             PaymentStatus @default(UNPAID)
+  paymentGatewayData Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@map("payments")
 }
 
 enum AppointmentStatus {

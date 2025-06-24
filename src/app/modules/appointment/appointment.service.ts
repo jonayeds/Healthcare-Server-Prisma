@@ -52,6 +52,8 @@ const createAppointment = async(user:TAuthUser, payload:any)=>{
     return result
 }
 
+
+
 export const AppointmentService ={
     createAppointment
 }
