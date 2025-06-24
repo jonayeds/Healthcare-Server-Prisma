@@ -15,7 +15,7 @@ router.get(
 router.get(
   "/",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
-  AppointmentController.getAllAppointments
+AppointmentController.getAllAppointments
 );
 router.post(
   "/",
