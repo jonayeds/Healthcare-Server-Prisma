@@ -63,6 +63,7 @@ model Doctor {
 
   specialities    DoctorSpeciality[]
   doctorSchedules DoctorSchedule[]
+  appointments    Appointment[]
 
   @@map("doctors")
 }
@@ -80,6 +81,7 @@ model Patient {
 
   healthData    PatientHealthdata?
   medicalReport MedicalReport[]
+  appointments  Appointment[]
 
   user User @relation(fields: [email], references: [email])
 
@@ -155,6 +157,7 @@ model Schedule {
   updatedAt     DateTime @updatedAt
 
   doctorSchedules DoctorSchedule[]
+  appointments    Appointment?
 
   @@map("schedules")
 }
@@ -170,6 +173,36 @@ model DoctorSchedule {
 
   @@id([doctorId, scheduleId])
   @@map("doctorSchedules")
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  patientId      String
+  doctorId       String
+  scheduleId     String @unique
+  videoCallingId String?
+  status         AppointmentStatus @default(PENDING)
+  paymentStatus  PaymentStatus     @default(UNPAID)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  patient  Patient  @relation(fields: [patientId], references: [id])
+  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+
+  @@map("appointments")
+}
+
+enum AppointmentStatus {
+  PENDING
+  INPROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
 }
 
 enum UserRole {
