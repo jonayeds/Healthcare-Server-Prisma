@@ -214,6 +214,51 @@ const changeAppointmentStatus = async(appointmentId:string, status:AppointmentSt
   return result;
 }
 
+const cancelUnPaidAppointments = async()=>{
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000); 
+  const unpaidAppointments = await prisma.appointment.findMany({
+    where: {
+      payment: {
+        status: "UNPAID",
+      },
+      createdAt: {
+        lte: thirtyMinutesAgo,
+      },
+    },
+  })
+
+  const appointmentIds = unpaidAppointments.map(appointment => appointment.id);
+  const result = await prisma.$transaction(async(tx)=>{
+    await tx.payment.deleteMany({
+      where:{
+        appointmentId: {
+          in: appointmentIds,
+        },
+      }
+    })
+    await tx.doctorSchedule.updateMany({
+      where:{
+        appointmentId: {
+          in: appointmentIds,
+        },
+      },
+      data:{
+        isBooked: false,
+      }
+    })
+    await tx.appointment.deleteMany({
+      where:{
+        id: {
+          in: appointmentIds, 
+        }
+      }
+    })
+  })
+
+  console.log(appointmentIds) 
+
+}
+
 
 
 
@@ -221,5 +266,6 @@ export const AppointmentService = {
   createAppointment,
   getMyappointments,
   getAllAppointments,
-  changeAppointmentStatus
+  changeAppointmentStatus,
+  cancelUnPaidAppointments
 };
