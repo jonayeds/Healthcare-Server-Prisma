@@ -20,7 +20,19 @@ const getMyPrescriptions = catchAsync(async(req:Request & {user?:TAuthUser}, res
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Prescription Fetcheds successfully",
+        message: "My Prescriptions Fetched successfully",
+        data: result.data,
+        meta: result.meta        
+    }) 
+})
+const getAllPrescriptions = catchAsync(async(req:Request & {user?:TAuthUser}, res) => {
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const filters = pick(req.query, ['searchTerm', 'doctorId', 'patientId', 'appointmentId']);  
+    const result = await PrescriptionService.getAllPrescriptions(filters, options); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Prescriptions Fetched successfully",
         data: result.data,
         meta: result.meta        
     }) 
@@ -28,5 +40,6 @@ const getMyPrescriptions = catchAsync(async(req:Request & {user?:TAuthUser}, res
 
 export const PrescriptionController = {
     createPrescription,
-    getMyPrescriptions
+    getMyPrescriptions,
+    getAllPrescriptions
 }

@@ -24,7 +24,9 @@ const createReview = async (payload: any, user: TAuthUser) => {
       "You are not allowed to create a review for this appointment"
     );
   }
-  const result = await prisma.review.create({
+
+  const result = await prisma.$transaction(async(tx)=>{
+    const review =await prisma.review.create({
     data: {
       appointmentId: appointmentData.id,
       doctorId: appointmentData.doctorId,
@@ -33,6 +35,27 @@ const createReview = async (payload: any, user: TAuthUser) => {
       comment: payload?.comment,
     },
   });
+  const averageRating = await tx.review.aggregate({
+    where:{
+        doctorId: appointmentData.doctorId,
+    },
+    _avg:{
+        rating: true,
+    }
+  })
+
+  await tx.doctor.update({
+    where:{
+        id: appointmentData.doctorId,   
+    },
+    data:{
+        averageRating: averageRating._avg.rating || 0
+    }
+  })
+  return review;
+
+  })
+  
   return result;
 };
 
