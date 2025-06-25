@@ -37,10 +37,20 @@ const getAllAppointments = catchAsync(async(req, res)=>{
         data: result        
     })
 })
+const changeAppointmentStatus = catchAsync(async(req:Request & {user?:TAuthUser}, res)=>{
+    const result = await AppointmentService.changeAppointmentStatus(req.params.id, req.body.status, req.user as TAuthUser)
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Appointment Status updated successfully",
+        data: result        
+    })
+})
 
 
 export const AppointmentController = {
     createAppointment,
     getMyAppointments,
-    getAllAppointments
+    getAllAppointments,
+    changeAppointmentStatus
 }  

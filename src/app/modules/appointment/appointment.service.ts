@@ -1,6 +1,8 @@
-import { Prisma, UserRole } from "../../../../generated/prisma";
+import { AppointmentStatus, Prisma, UserRole } from "../../../../generated/prisma";
+import httpStatus from "http-status"; 
 import calculatePagination from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
+import { ApiError } from "../../errors/ApiError";
 import { TAuthUser } from "../../interfaces/common";
 import { v4 as uuidv4 } from "uuid";
 
@@ -189,10 +191,35 @@ const getAllAppointments = async (
   };
 };
 
+const changeAppointmentStatus = async(appointmentId:string, status:AppointmentStatus, user:TAuthUser)=>{
+  const appointmentData = await prisma.appointment.findUniqueOrThrow({
+    where: {
+      id: appointmentId,
+    },  
+    include: {
+      doctor: true,
+    }
+  })
+  if(user.role === UserRole.DOCTOR && appointmentData.doctor.email !== user.email){
+    throw new ApiError( httpStatus.UNAUTHORIZED,"You are not authorized to change the status of this appointment");   
+  }
+  const result = await prisma.appointment.update({
+    where: {
+      id: appointmentData.id,
+    },
+    data:{
+      status
+    }
+  })
+  return result;
+}
+
+
 
 
 export const AppointmentService = {
   createAppointment,
   getMyappointments,
-  getAllAppointments
+  getAllAppointments,
+  changeAppointmentStatus
 };
