@@ -1,6 +1,6 @@
 import { UserRole } from "../generated/prisma"
-import { ApiError } from "../src/app/errors/ApiError"
 import prisma from "../src/shared/prisma"
+import bcrypt from "bcrypt"
 
 const seedSuperAdmin = async()=>{
     try {
@@ -12,12 +12,13 @@ const seedSuperAdmin = async()=>{
         if (superAdmin) {
             console.log("Super Admin already exists")
             return
-        }   
+        } 
+        const password =  await bcrypt.hash("superadmin", 10)  
         const result = await prisma.$transaction(async(tx)=>{
             const user = await tx.user.create({
                 data: {
                     email:"super@admin.com",
-                    password:"superadmin",
+                    password,
                     role: UserRole.SUPER_ADMIN,
                     admin:{
                         create:{
