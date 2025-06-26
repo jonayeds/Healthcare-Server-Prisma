@@ -6,6 +6,12 @@ import calculatePagination from "../../../helpers/paginationHelper";
 import { ApiError } from "../../errors/ApiError";
 import httpStatus from "http-status";
 
+const convertDateTime = async(date:Date)=>{
+  const offset = date.getTimezoneOffset() * 60000
+  return new Date(date.getTime() + offset);
+}
+
+
 const createSchedule = async (
   payload: ISchedule
 ): Promise<Schedule[] | null> => {
@@ -34,10 +40,17 @@ const createSchedule = async (
     );
 
     while (startDateTime < endDateTime) {
+      // scheduleData.push({
+      //   startDateTime,
+      //   endDateTime: addHours(startDateTime, 0.5),
+      // });
+      const s = await convertDateTime(startDateTime)
+      const e = await convertDateTime(addHours(startDateTime, 0.5))
       scheduleData.push({
-        startDateTime,
-        endDateTime: addHours(startDateTime, 0.5),
+        startDateTime:s,
+        endDateTime:e,
       });
+
       startDateTime = addHours(startDateTime, 0.5);
     }
     currentDate = addHours(currentDate, 24);
