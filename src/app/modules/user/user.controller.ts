@@ -8,22 +8,14 @@ import { JwtPayload } from "jsonwebtoken";
 import { fileUploader } from "../../../helpers/uploader";
 import { TAuthUser } from "../../interfaces/common";
 
-const createAdmin = async(req:Request, res:Response)=>{
-    try {
+const createAdmin = catchAsync(async(req:Request, res:Response)=>{
         const result = await UserService.createAdmin(req);
     res.status(200).json({
         success: true,
         message: "Admin created successfully",      
         data: result    
-    })  
-    } catch (error:any) {
-        res.status(200).json({
-        success: false,
-        message: error?.message || "Failed to create admin",      
-        error   
-    })  
-    }  
-}
+    })   
+})
 const createDoctor = async(req:Request, res:Response)=>{
     try {
         const result = await UserService.createDoctor(req);
